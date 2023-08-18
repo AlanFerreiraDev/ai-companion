@@ -1,5 +1,6 @@
 'use client'
 
+import axios from 'axios'
 import * as z from 'zod'
 import { Category, Companion } from '@prisma/client'
 import { useForm } from 'react-hook-form'
@@ -29,6 +30,8 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Wand2 } from 'lucide-react'
+import { useToast } from '@/components/ui/use-toast'
+import { useRouter } from 'next/navigation'
 
 interface CompanionFormProps {
   initialData: Companion | null
@@ -76,6 +79,9 @@ export const CompanionForm = ({
   initialData,
   categories,
 }: CompanionFormProps) => {
+  const router = useRouter()
+  const { toast } = useToast()
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
@@ -91,7 +97,28 @@ export const CompanionForm = ({
   const isLoading = form.formState.isSubmitting
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values)
+    try {
+      if (initialData) {
+        // Update
+        axios.patch(`/api/companion/${initialData.id}`, values)
+      } else {
+        //Create
+        await axios.post('/api/companion', values)
+      }
+
+      toast({
+        description: 'Success',
+        duration: 5000,
+      })
+
+      router.refresh()
+      router.push('/')
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        description: 'Something went wrong. Please try again later.',
+      })
+    }
   }
 
   return (
