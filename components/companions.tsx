@@ -37,7 +37,7 @@ export const Companions = ({ data }: CompanionsProps) => {
                 <Image
                   src={item.src}
                   fill
-                  className="rounded-lg object-fill"
+                  className="rounded-lg object-cover"
                   alt="Companion"
                 />
               </div>
